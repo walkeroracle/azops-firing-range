@@ -1,0 +1,44 @@
+---
+name: "AzOps - Tests"
+
+on:
+  workflow_dispatch:
+
+  pull_request_target:
+    branches: [main]
+    paths:
+      - "src/**"
+
+permissions:
+      id-token: write
+      contents: write
+      pull-requests: write
+
+jobs:
+  tests:
+    name: "Tests"
+    runs-on: ubuntu-latest
+    env:
+      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+
+    steps:
+
+      - name: "Checkout"
+        uses: actions/checkout@v4
+        with:
+          ref: ${{github.event.pull_request.head.sha}}
+          repository: ${{github.event.pull_request.head.repo.full_name}}
+          fetch-depth: 0
+
+      - name: "Dependencies"
+        shell: bash
+        run: |
+          bash scripts/dependencies.sh
+
+      - name: "Run Tests"
+        shell: bash
+        run: |
+          bash src/tests/run-tests.sh
