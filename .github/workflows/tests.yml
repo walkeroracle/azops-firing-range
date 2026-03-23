@@ -8,6 +8,7 @@ on:
     branches: [main]
     paths:
       - "src/**"
+      - "!src/AzOps.psd1"
 
 permissions:
       id-token: write
@@ -26,6 +27,7 @@ jobs:
 
     steps:
 
+      # Checkout
       - name: "Checkout"
         uses: actions/checkout@v4
         with:
@@ -33,12 +35,14 @@ jobs:
           repository: ${{github.event.pull_request.head.repo.full_name}}
           fetch-depth: 0
 
+      # Dependencies
       - name: "Dependencies"
-        shell: bash
+        shell: pwsh
         run: |
-          bash scripts/dependencies.sh
+          ./scripts/Dependencies.ps1
 
+      # Run Tests
       - name: "Run Tests"
-        shell: bash
+        shell: pwsh
         run: |
-          bash src/tests/run-tests.sh
+          ./src/tests/Pester.ps1 -TestGeneral $true
